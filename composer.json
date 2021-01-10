@@ -19,5 +19,10 @@
             "Lum\\Lubye\\": "src/"
         }
     },
-    "bin": ["lubye"]
+    "bin": [
+        "lubye"
+    ],
+    "config": {
+        "bin-dir": "scripts"
+    }
 }

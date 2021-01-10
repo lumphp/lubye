@@ -1,7 +1,8 @@
 {
     "name": "lumphp/lubye",
-    "description": "PHP Code Generator",
+    "description": "Yet another php7+ code generator!",
     "license": "MIT",
+    "version": "0.1.0",
     "authors": [
         {
             "name": "cjj",

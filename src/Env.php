@@ -1,79 +1,107 @@
 <?php
 namespace Lum\Lubye;
 
-use Dotenv\Dotenv;
-use Dotenv\Repository\Adapter\EnvConstAdapter;
+use Closure;
 use Dotenv\Repository\Adapter\PutenvAdapter;
 use Dotenv\Repository\RepositoryBuilder;
+use PhpOption\Option;
 
 /**
  * Class Env
  *
- * @package Lum\Lumbye
+ * @package Lum\Lubye
  */
-class Env {
+class Env
+{
     /**
      * Indicates if the putenv adapter is enabled.
      *
      * @var bool
      */
-    protected static $putEnv=true;
+    protected static $putenv = true;
     /**
-     * The environment factory instance.
+     * The environment repository instance.
      *
-     * @var Dotenv|null
+     * @var \Dotenv\Repository\RepositoryInterface|null
      */
-    protected static $dotEnv;
+    protected static $repository;
+
     /**
-     * The environment variables instance.
+     * Enable the putenv adapter.
      *
-     * @var |null
+     * @return void
      */
-    protected static $variables;
+    public static function enablePutenv()
+    {
+        static::$putenv = true;
+        static::$repository = null;
+    }
 
     /**
      * Disable the putenv adapter.
      *
      * @return void
      */
-    public static function disablePutEnv() {
-        static::$putEnv=false;
-        static::$dotEnv=null;
-        static::$variables=null;
+    public static function disablePutenv()
+    {
+        static::$putenv = false;
+        static::$repository = null;
     }
 
     /**
-     * Get the environment factory instance.
+     * Get the environment repository instance.
      *
-     * @param string|array $paths
-     * @param string|array|null $names
-     * @param bool $isImmutable
-     *
-     * @return Dotenv
+     * @return \Dotenv\Repository\RepositoryInterface
      */
-    public static function getDotEnvInstance($paths, $names=null, $isImmutable=false) : Dotenv {
-        if (null === static::$dotEnv) {
-            $adapters=array_merge([
-                new EnvConstAdapter,
-            ], static::$putEnv ? [new PutenvAdapter] : []);
-            $repository=RepositoryBuilder::create()->withReaders($adapters)->withWriters($adapters);
-            if ($isImmutable) {
-                $repository=$repository->immutable();
+    public static function getRepository()
+    {
+        if (static::$repository === null) {
+            $builder = RepositoryBuilder::createWithDefaultAdapters();
+            if (static::$putenv) {
+                $builder = $builder->addAdapter(PutenvAdapter::class);
             }
-            static::$dotEnv=Dotenv::create($repository->make(), $paths, $names);
+            static::$repository = $builder->immutable()->make();
         }
-        return static::$dotEnv;
+
+        return static::$repository;
     }
 
     /**
      * Gets the value of an environment variable.
      *
-     * @param  string $key
-     * @param null|mixed $default
+     * @param string $key
+     * @param mixed $default
      *
-     * @return null|mixed
+     * @return mixed
      */
-    public static function get(string $key, $default=null) {
-        return $_ENV[$key] ?? $default;
+    public static function get(string $key, $default = null)
+    {
+        return Option::fromValue(static::getRepository()->get($key))->map(
+            function ($value) {
+                switch (strtolower($value)) {
+                    case 'true':
+                    case '(true)':
+                        return true;
+                    case 'false':
+                    case '(false)':
+                        return false;
+                    case 'empty':
+                    case '(empty)':
+                        return '';
+                    case 'null':
+                    case '(null)':
+                        return;
+                }
+                if (preg_match('/\A([\'"])(.*)\1\z/', $value, $matches)) {
+                    return $matches[2];
+                }
+
+                return $value;
+            }
+        )->getOrCall(
+            function () use ($default) {
+                return $default instanceof Closure ? $default() : $default;
+            }
+        );
     }
 }

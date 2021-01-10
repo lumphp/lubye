@@ -3,7 +3,7 @@ namespace Lum\Lubye;
 
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidFileException;
-use Lum\Lumbye\Console\ConsoleDefaultOutput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * Class LoadEnv
@@ -65,7 +65,11 @@ class LoadEnv {
      * @return Dotenv
      */
     protected function createDotEnv() {
-        return Env::getDotEnvInstance($this->filePath, $this->fileName);
+        return Dotenv::create(
+            Env::getRepository(),
+            $this->filePath,
+            $this->fileName
+        );
     }
 
     protected function init() : void {
@@ -85,10 +89,11 @@ class LoadEnv {
      * @return void
      */
     protected function writeErrorAndDie(array $errors) {
-        $output=(new ConsoleDefaultOutput)->getErrorOutput();
-        foreach ($errors as $error) {
-            $output->writeln($error);
-        }
-        die(1);
+        $output = (new ConsoleOutput)->getErrorOutput();
+
+        $output->writeln('The environment file is invalid!');
+        $output->writeln($e->getMessage());
+
+        exit(1);
     }
 }

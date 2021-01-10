@@ -1,0 +1,73 @@
+<?php
+//php lubye --plan=tp6.commission --output=apiadmin --data=lqCloud
+return [
+    'plan'=>'tp6',
+    //输出 路径
+    'outputPath'=>'%sdist/%s/',
+    //生成器
+    'generator'=>[
+        'base'=>[
+            //命名空间
+            'namespace'=>'dynet\\commission\\',
+            'baseNamespace'=>'dynet\\base\\',
+            //源代码 路径
+            'sourcePath'=>'src/',
+            'composerName'=>'tp/apiadmin',
+            'projectErrInitNum'=>13900,
+            'errorNumIncrease'=>100
+        ],
+        'project'=>[
+            'platform'=>[
+                //table => class name
+                'commission_app'=>'CommissionApp',
+            ],
+        ],
+        'templates'=>[
+            //--------------生成项目相关代码----------------
+            //生成Controller
+            'serviced/Controller.php'=>[
+                'path'=>'src/controller/%s.php',
+                'generate_by_project'=>true,
+                'base_class'=>'Base',
+                'suffix'=>'Controller',
+            ],
+            //生成Validate
+            'Validate.php'=>[
+                'path'=>'src/validate/%sValidate.php',
+                'generate_by_project'=>true,
+                'use_module'=>0,
+            ],
+            //生成Model
+            'Model.php'=>[
+                'path'=>'src/Models/%s.php',
+                'generate_by_project'=>true,
+                'use_module'=>0,
+            ],
+            //生成路由
+            'routes.php'=>[
+                'path'=>'src/route.php',
+                'generate_by_project'=>true,
+                'use_module'=>0,
+                'is_append'=>true
+            ],
+            'views/admin_list.vue.php'=>[
+                'path'=>'vue/src/view/%s/%s.vue',
+                'generate_by_project'=>true,
+                'use_module'=>1,
+                'use_table_name'=>1,
+            ],
+            'views/admin_style.less.php'=>[
+                'path'=>'vue/src/view/%s/%s.less',
+                'generate_by_project'=>true,
+                'use_module'=>1,
+                'use_table_name'=>1,
+            ],
+            'views/admin_api.js.php'=>[
+                'path'=>'vue/src/api/%s.js',
+                'generate_by_project'=>true,
+                'use_module'=>false,
+                'use_table_name'=>1,
+            ],
+        ],
+    ],
+];

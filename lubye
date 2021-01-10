@@ -1,0 +1,48 @@
+#!/usr/bin/env php
+<?php
+defined('ROOT_PATH') or define('ROOT_PATH', __DIR__);
+if (file_exists(ROOT_PATH . '/../vendor/autoload.php')) {
+    require_once ROOT_PATH . '/../vendor/autoload.php';
+} else {
+    require_once ROOT_PATH . '/vendor/autoload.php';
+}
+
+use Lum\Lubye\Bootstrap;
+use Lum\Lubye\Env;
+use Lum\Lubye\LoadEnv;
+use Lum\Lubye\Utils\Config;
+use Lum\Lubye\Utils\Constant;
+use Lum\Lubye\Utils\Path;
+use Lum\Lubye\Utils\Registry;
+
+$longOpts=[
+    'plan:',
+    'output:',
+    'data:'
+];
+$options=getopt('', $longOpts);
+//获取 构建方案名称 参数
+$plan=$options['plan']??null;
+if (!$plan) {
+    //TODO:
+}
+$output=$options['output']??null;
+$dataSource=$options['data']??null;
+//载入.env
+(new LoadEnv(ROOT_PATH))->bootstrap();
+$resourcePath = Env::get('APP_RESOURCE_PATH');
+$path = Path::getInstance(ROOT_PATH,$resourcePath);
+
+try {
+    $plan_config=new Config(sprintf('plan.%s' ,$plan),$path);
+} catch (\Lum\Lubye\Exceptions\LubyeException $e) {
+    $plan_config=new Config(sprintf('plan.%s.default',$plan),$path);
+}
+$registry=Registry::getInstance();
+$registry->set(Constant::PLAN_CONFIG_KEY, $plan_config);
+//获取 数据源 配置
+$db_config=new Config('config.db',$path);
+$registry=Registry::getInstance();
+$registry->set(Constant::DB_CONFIG_KEY, $db_config);
+$builder=new Bootstrap;
+$builder->run($output, $dataSource,$path);

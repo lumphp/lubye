@@ -1,0 +1,21 @@
+{
+    "name": "lumphp/lubye",
+    "description": "PHP Code Generator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "cjj",
+            "email": "rustysun.cn@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.3",
+        "vlucas/phpdotenv": "^4.1.0",
+        "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lum\\Lubye\\": "src/"
+        }
+    }
+}
